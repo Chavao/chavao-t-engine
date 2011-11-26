@@ -5,10 +5,10 @@ include '../CTemplate.php';
 $objT = new CTemplate('new.html','templates');
 
 /*
-$objT = new CTemplate();
-$objT->setPath('templates');
-$objT->setTemplate('new.html');
-*/
+ $objT = new CTemplate();
+ $objT->setPath('templates');
+ $objT->setTemplate('new.html');
+ */
 
 $linha[0] = "Zero";
 $linha[1] = "One";
