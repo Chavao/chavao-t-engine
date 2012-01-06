@@ -2,8 +2,9 @@
 
 class CTemplate
 {
-    var $sHtml;
-    static $sPath;
+    private $sHtml = '';
+    private $sPath = '';
+    private $arrTarget = array();
 
     /**
      * @name __construct
@@ -11,23 +12,10 @@ class CTemplate
      * @param string $psPath Stores the templates path
      * @return void
      */
-    function __construct($psHtml=null,$psPath=null)
+    function __construct($psHtml=null, $psPath=null)
     {
-        if(!is_null($psPath))
-        {
-            self::$sPath = (substr($psPath,-1)=="/") ? $psPath : $psPath."/";
-        }
-
-        if(!is_null($psHtml))
-        {
-            ob_start();
-            if(is_file(self::$sPath.$psHtml))
-            {
-                include self::$sPath.$psHtml;
-            }
-            $this->sHtml = ob_get_contents();
-            ob_clean();
-        }
+        $this->setPath($psPath);
+        $this->setTemplate($psHtml);
     }
 
     /**
@@ -40,7 +28,8 @@ class CTemplate
     {
         if(!is_null($psPath))
         {
-            self::$sPath = (substr($psPath,-1)=="/") ? $psPath : $psPath."/";
+            $sDS = DIRECTORY_SEPARATOR;
+            $this->sPath = (substr($psPath,-1) == $sDS) ? $psPath : $psPath.$sDS;
         }
     }
 
@@ -53,9 +42,9 @@ class CTemplate
     function setTemplate($psHtml)
     {
         ob_start();
-        if(is_file(self::$sPath.$psHtml))
+        if(is_file($this->sPath.$psHtml))
         {
-            include self::$sPath.$psHtml;
+            include $this->sPath.$psHtml;
         }
         $this->sHtml = ob_get_contents();
         ob_clean();
@@ -84,35 +73,34 @@ class CTemplate
         {
             if(!is_array($sValue))
             {
-                $this->sHtml = str_replace("{".$sTarget."}",$sValue,$this->sHtml);
+                $this->sHtml = str_replace('{'.$sTarget.'}', $sValue, $this->sHtml);
                 unset($this->arrTarget[$sTarget]);
             }
         }
 
-        $arrHtml = explode("\n",$this->sHtml);
+        $arrHtml = explode("\n", $this->sHtml);
 
         // Wow, foreach, foreach, foreach, foreach... Developers, developers, developers...
         foreach($arrHtml as $iLine => $sHtml)
         {
+            $sReturn = '';
             foreach($this->arrTarget as $sTarget => $arrValue)
             {
                 if(is_array($arrValue))
                 {
                     foreach($arrValue as $sValue)
                     {
-                        if(preg_match('/\{' . $sTarget . '\}/i',$sHtml))
+                        if(preg_match('/\{' . $sTarget . '\}/i', $sHtml))
                         {
-                            $sReturn .= str_replace("{".$sTarget."}",$sValue,$sHtml);
+                            $sReturn .= str_replace('{'.$sTarget.'}', $sValue, $sHtml);
                             $arrHtml[$iLine] = $sReturn;
                         }
                     }
                 }
             }
-
-            unset($sReturn);
         }
 
-        return $this->sHtml = implode("",$arrHtml);
+        return $this->sHtml = implode('',$arrHtml);
     }
 
     /**
